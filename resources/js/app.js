@@ -11,8 +11,22 @@ import ResetPassword from './Pages/ResetPassword.vue';
 import Dashboard from './Pages/Dashboard.vue';
 import Profiles from './Pages/Profiles.vue';
 import Pricing from './Pages/Pricing.vue';
+import AdminLogin from './Pages/Admin/Login.vue';
+import AdminDashboard from './Pages/Admin/Dashboard.vue';
 
-const pages = { Welcome, Browse, Login, Register, ForgotPassword, ResetPassword, Dashboard, Profiles, Pricing };
+const pages = {
+    Welcome,
+    Browse,
+    Login,
+    Register,
+    ForgotPassword,
+    ResetPassword,
+    Dashboard,
+    Profiles,
+    Pricing,
+    'Admin/Login': AdminLogin,
+    'Admin/Dashboard': AdminDashboard,
+};
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Banjara Matrimonial';
 

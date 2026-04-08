@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -52,6 +53,18 @@ Route::get('/browse', function () {
 Route::get('/pricing', function () {
     return Inertia::render('Pricing');
 })->name('pricing');
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('guest')->group(function () {
+        Route::get('/login', [AdminController::class, 'showLogin'])->name('login');
+        Route::post('/login', [AdminController::class, 'login'])->name('login.attempt');
+    });
+
+    Route::middleware(['auth', 'admin'])->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
+    });
+});
 
 // Authenticated Routes
 Route::middleware(['auth', 'verified'])->group(function () {
