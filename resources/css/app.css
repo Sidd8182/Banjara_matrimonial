@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-primary text-white rounded-lg hover:bg-red-700 transition;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 bg-secondary text-white rounded-lg hover:bg-orange-600 transition;
+  }
+
+  .full-bleed {
+    @apply relative left-1/2 right-1/2 w-screen -ml-[50vw] -mr-[50vw];
+  }
+
+  .section-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .profile-slider-mask {
+    @apply overflow-hidden;
+  }
+
+  .profile-slider-track {
+    @apply flex gap-4 w-max;
+    animation: profile-slide 32s linear infinite;
+  }
+
+  .profile-slide-card {
+    width: 270px;
+    flex: 0 0 auto;
+  }
+}
+
+@keyframes profile-slide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
