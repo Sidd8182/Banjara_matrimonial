@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'super_admin_path' => env('SUPER_ADMIN_PATH', 'super-control-portal-91x'),
+
     'asset_url' => env('ASSET_URL', null),
 
     /*

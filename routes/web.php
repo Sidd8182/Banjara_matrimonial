@@ -54,7 +54,7 @@ Route::get('/pricing', function () {
     return Inertia::render('Pricing');
 })->name('pricing');
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix(config('app.super_admin_path'))->name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AdminController::class, 'showLogin'])->name('login');
         Route::post('/login', [AdminController::class, 'login'])->name('login.attempt');

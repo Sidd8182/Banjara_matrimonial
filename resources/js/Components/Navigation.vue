@@ -67,13 +67,6 @@
         <!-- Auth Buttons -->
         <div class="hidden md:flex space-x-3 items-center">
           <template v-if="isAuthenticated">
-            <a
-              v-if="isAdmin"
-              href="/admin/dashboard"
-              class="px-4 py-2 text-amber-700 border border-amber-400 rounded-lg hover:bg-amber-50 transition"
-            >
-              Admin Panel
-            </a>
             <a href="/dashboard" class="px-4 py-2 text-primary border border-primary rounded-lg hover:bg-red-50 transition">
               Dashboard
             </a>
@@ -179,13 +172,6 @@
           <a href="/messages" class="text-gray-700 hover:text-primary transition">Messages</a>
         </div>
         <div v-if="isAuthenticated" class="mt-4 grid grid-cols-2 gap-3">
-          <a
-            v-if="isAdmin"
-            href="/admin/dashboard"
-            class="px-4 py-2 text-center text-amber-700 border border-amber-400 rounded-lg hover:bg-amber-50 transition"
-          >
-            Admin Panel
-          </a>
           <a href="/dashboard" class="px-4 py-2 text-center text-primary border border-primary rounded-lg hover:bg-red-50 transition">
             Dashboard
           </a>
@@ -270,7 +256,6 @@ const activeCategory = ref('Mother Tongue');
 const mobileActiveCategory = ref('Mother Tongue');
 const page = usePage();
 const isAuthenticated = computed(() => Boolean(page.props.auth?.user));
-const isAdmin = computed(() => ['admin', 'super_admin'].includes(page.props.auth?.user?.role || ''));
 
 const browseCategories = [
   'Mother Tongue',

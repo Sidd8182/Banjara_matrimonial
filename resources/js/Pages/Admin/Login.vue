@@ -62,7 +62,14 @@ const form = useForm({
   remember: false,
 });
 
+const props = defineProps({
+  loginAction: {
+    type: String,
+    required: true,
+  },
+});
+
 const submit = () => {
-  form.post('/admin/login');
+  form.post(props.loginAction);
 };
 </script>

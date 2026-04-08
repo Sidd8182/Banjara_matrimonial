@@ -12,9 +12,13 @@ use Inertia\Inertia;
 
 class AdminController extends Controller
 {
+    private const ALLOWED_ADMIN_ROLES = ['admin', 'super_admin'];
+
     public function showLogin()
     {
-        return Inertia::render('Admin/Login');
+        return Inertia::render('Admin/Login', [
+            'loginAction' => url(trim(config('app.super_admin_path'), '/') . '/login'),
+        ]);
     }
 
     public function login(Request $request)
@@ -33,7 +37,7 @@ class AdminController extends Controller
             ]);
         }
 
-        if (!in_array($user->role, ['admin', 'super_admin'], true)) {
+        if (!in_array($user->role, self::ALLOWED_ADMIN_ROLES, true)) {
             throw ValidationException::withMessages([
                 'email' => ['This account does not have admin access.'],
             ]);
@@ -52,13 +56,14 @@ class AdminController extends Controller
         $profileCompletedUsers = User::where('profile_completion_step', '>=', 5)->count();
 
         return Inertia::render('Admin/Dashboard', [
+            'logoutAction' => url(trim(config('app.super_admin_path'), '/') . '/logout'),
             'stats' => [
                 'totalUsers' => $totalUsers,
                 'verifiedUsers' => $verifiedUsers,
                 'profileCompletedUsers' => $profileCompletedUsers,
                 'maleUsers' => User::where('gender', 'Male')->count(),
                 'femaleUsers' => User::where('gender', 'Female')->count(),
-                'adminUsers' => User::whereIn('role', ['admin', 'super_admin'])->count(),
+                'adminUsers' => User::whereIn('role', self::ALLOWED_ADMIN_ROLES)->count(),
             ],
             'recentUsers' => User::select('id', 'name', 'email', 'gender', 'role', 'created_at')
                 ->latest()
