@@ -26,7 +26,7 @@
                 :key="`${menu.label}-${item.label}`"
               >
                 <a
-                  href="#"
+                  :href="item.url || '#'"
                   class="block rounded-md px-2.5 py-1.5 text-[12px] text-slate-300 hover:bg-slate-800 hover:text-white"
                 >
                   {{ item.label }}
@@ -34,11 +34,11 @@
                 <div v-if="item.children" class="ml-3 mt-1 space-y-1 border-l border-slate-700 pl-2">
                   <a
                     v-for="child in item.children"
-                    :key="`${item.label}-${child}`"
-                    href="#"
+                    :key="`${item.label}-${child.label}`"
+                    :href="child.url || '#'"
                     class="block rounded-md px-2 py-1 text-[11px] text-slate-400 hover:bg-slate-800 hover:text-slate-100"
                   >
-                    {{ child }}
+                    {{ child.label }}
                   </a>
                 </div>
               </div>
@@ -53,11 +53,19 @@
             <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500">Operational Analytics</p>
             <h2 class="text-xl font-bold text-slate-900">Super Administrator Dashboard</h2>
           </div>
-          <form @submit.prevent="logout">
-            <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition">
-              Logout
-            </button>
-          </form>
+          <div class="flex items-center gap-2">
+            <a :href="pricingManagementUrl" class="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
+              Manage Pricing
+            </a>
+            <a :href="subscriptionsUrl" class="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
+              View Subscriptions
+            </a>
+            <form @submit.prevent="logout">
+              <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition">
+                Logout
+              </button>
+            </form>
+          </div>
         </header>
 
         <section class="mt-4 grid grid-cols-2 xl:grid-cols-6 gap-3">
@@ -84,6 +92,14 @@
           <article class="rounded-xl bg-white border border-slate-200 p-3 shadow-sm">
             <p class="text-[11px] text-slate-500">Admins</p>
             <p class="text-2xl font-bold text-amber-600 mt-1">{{ stats.adminUsers }}</p>
+          </article>
+          <article class="rounded-xl bg-white border border-slate-200 p-3 shadow-sm">
+            <p class="text-[11px] text-slate-500">Active Subscriptions</p>
+            <p class="text-2xl font-bold text-emerald-600 mt-1">{{ stats.activeSubscriptions }}</p>
+          </article>
+          <article class="rounded-xl bg-white border border-slate-200 p-3 shadow-sm">
+            <p class="text-[11px] text-slate-500">Expired Subscriptions</p>
+            <p class="text-2xl font-bold text-orange-600 mt-1">{{ stats.expiredSubscriptions }}</p>
           </article>
         </section>
 
@@ -205,6 +221,45 @@
             </div>
           </div>
         </section>
+
+        <section class="mt-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between gap-2">
+            <h3 class="text-sm font-bold text-slate-900">Latest Plan Purchases</h3>
+            <a :href="subscriptionsUrl" class="text-xs font-semibold text-indigo-600 hover:underline">Open Full Subscriptions</a>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full">
+              <thead class="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th class="px-4 py-2 text-left">User</th>
+                  <th class="px-4 py-2 text-left">Plan</th>
+                  <th class="px-4 py-2 text-left">Amount</th>
+                  <th class="px-4 py-2 text-left">Status</th>
+                  <th class="px-4 py-2 text-left">Ends On</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-[12px]">
+                <tr v-for="subscription in recentSubscriptions" :key="subscription.id" class="hover:bg-slate-50/60">
+                  <td class="px-4 py-2.5">
+                    <p class="font-semibold text-slate-900">{{ subscription.user?.name || 'Unknown' }}</p>
+                    <p class="text-[11px] text-slate-500">{{ subscription.user?.email || '-' }}</p>
+                  </td>
+                  <td class="px-4 py-2.5 font-semibold text-slate-900">{{ subscription.plan?.name || '-' }}</td>
+                  <td class="px-4 py-2.5 text-slate-700">{{ subscription.currency }} {{ formatAmount(subscription.amount) }}</td>
+                  <td class="px-4 py-2.5">
+                    <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold" :class="subscriptionStatusClass(subscription.status)">
+                      {{ subscription.status }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-2.5 text-slate-600">{{ subscription.ends_at ? formatDate(subscription.ends_at) : 'Lifetime' }}</td>
+                </tr>
+                <tr v-if="!recentSubscriptions.length">
+                  <td colspan="5" class="px-4 py-6 text-center text-xs text-slate-500">No subscription records available.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
       </main>
     </div>
   </div>
@@ -219,6 +274,22 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  pricingManagementUrl: {
+    type: String,
+    required: true,
+  },
+  integrationSettingsUrl: {
+    type: String,
+    required: true,
+  },
+  subscriptionsUrl: {
+    type: String,
+    required: true,
+  },
+  sidebarMenus: {
+    type: Array,
+    default: () => [],
+  },
   stats: {
     type: Object,
     required: true,
@@ -227,52 +298,19 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  recentSubscriptions: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const search = ref('');
 const roleFilter = ref('all');
+const sidebarMenus = computed(() => props.sidebarMenus || []);
 
-const sidebarMenus = [
-  {
-    label: 'User Management',
-    items: [
-      { label: 'All Members', children: ['Active', 'Blocked', 'Pending Verification'] },
-      { label: 'Premium Users' },
-      { label: 'Admin Accounts' },
-    ],
-  },
-  {
-    label: 'Content Moderation',
-    items: [
-      { label: 'Profile Approvals' },
-      { label: 'Photo Reports' },
-      { label: 'Message Monitoring' },
-    ],
-  },
-  {
-    label: 'Business Analytics',
-    items: [
-      { label: 'Revenue Trends' },
-      { label: 'Subscription Funnel' },
-      { label: 'Geo Intelligence', children: ['City Heatmap', 'State Distribution'] },
-    ],
-  },
-  {
-    label: 'Platform Settings',
-    items: [
-      { label: 'SMTP & Notifications' },
-      { label: 'Membership Plans' },
-      { label: 'Security Controls' },
-    ],
-  },
-];
-
-const openMenus = reactive({
-  'User Management': true,
-  'Content Moderation': true,
-  'Business Analytics': false,
-  'Platform Settings': false,
-});
+const openMenus = reactive(
+  Object.fromEntries((sidebarMenus.value || []).map((menu, index) => [menu.label, index < 2]))
+);
 
 const toggleMenu = (label) => {
   openMenus[label] = !openMenus[label];
@@ -332,6 +370,14 @@ const verificationClass = (user) => {
   return user.email_verified_at ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
 };
 
+const subscriptionStatusClass = (status) => {
+  if (status === 'active') return 'bg-emerald-100 text-emerald-700';
+  if (status === 'expired') return 'bg-amber-100 text-amber-700';
+  if (status === 'pending') return 'bg-cyan-100 text-cyan-700';
+  if (status === 'failed') return 'bg-rose-100 text-rose-700';
+  return 'bg-slate-100 text-slate-700';
+};
+
 const formatDate = (value) => {
   if (!value) {
     return '-';
@@ -341,6 +387,15 @@ const formatDate = (value) => {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
+  });
+};
+
+const formatAmount = (value) => {
+  const numeric = Number(value || 0);
+
+  return numeric.toLocaleString('en-IN', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
 };
 </script>

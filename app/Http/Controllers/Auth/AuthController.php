@@ -32,6 +32,11 @@ class AuthController extends Controller
         return Inertia::render('ForgotPassword');
     }
 
+    public function showVerifyEmail()
+    {
+        return Inertia::render('VerifyEmail');
+    }
+
     public function showResetPassword(Request $request, string $token)
     {
         return Inertia::render('ResetPassword', [
@@ -89,6 +94,12 @@ class AuthController extends Controller
             ]);
         }
 
+        if (in_array($user->role, ['admin', 'super_admin'], true)) {
+            throw ValidationException::withMessages([
+                'email' => ['This account is for super admin portal. Please use the hidden admin login URL.'],
+            ]);
+        }
+
         if (!$user->hasVerifiedEmail()) {
             throw ValidationException::withMessages([
                 'email' => ['Please verify your email address first.'],
@@ -124,11 +135,38 @@ class AuthController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if ($user && !$user->hasVerifiedEmail()) {
-            $this->sendVerificationEmailSafely($user);
+        if (!$user) {
+            return back()->with('status', 'If your account exists and is unverified, a verification link has been sent.');
         }
 
-        return back()->with('status', 'If your account exists and is unverified, a verification link has been sent.');
+        if ($user->hasVerifiedEmail()) {
+            return back()->with('status', 'This email is already verified. Please log in.');
+        }
+
+        if ($this->sendVerificationEmailSafely($user)) {
+            return back()->with('status', 'Verification link sent to your registered email address.');
+        }
+
+        return back()->with('status', 'Could not send verification email right now. Please check email address or SMTP settings and try again.');
+    }
+
+    public function resendVerificationAuthenticated(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->route('dashboard');
+        }
+
+        if ($this->sendVerificationEmailSafely($user)) {
+            return back()->with('status', 'A fresh verification link has been sent to your email address.');
+        }
+
+        return back()->with('status', 'Unable to send verification email right now. Please check your mailbox address and SMTP settings.');
     }
 
     public function sendPasswordResetLink(Request $request)

@@ -1,6 +1,18 @@
 <template>
   <MainLayout>
     <div>
+      <div
+        v-if="astrologyConfig.enabled"
+        class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-4 py-2.5 mb-4 text-sm"
+      >
+        <span v-if="astrologyConfig.matchmakingEnabled">
+          Astrology matchmaking active hai. Results kundli compatibility ke hisaab se rank kiye gaye hain.
+        </span>
+        <span v-else>
+          Astrology integration configured hai, lekin matchmaking abhi normal mode par hai.
+        </span>
+      </div>
+
       <!-- Search & Filter Section -->
       <div class="bg-white rounded-lg shadow p-6 mb-8">
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Browse Profiles</h2>
@@ -62,20 +74,32 @@
       <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <div v-for="profile in profiles" :key="profile.id" class="bg-white rounded-lg shadow overflow-hidden hover:shadow-xl transition">
           <!-- Profile Image -->
-          <div class="w-full h-40 bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <span class="text-5xl">👤</span>
+          <div class="w-full h-40 bg-gradient-to-br from-primary to-secondary flex items-center justify-center overflow-hidden">
+            <img
+              v-if="profile.profilePictureUrl"
+              :src="profile.profilePictureUrl"
+              alt="Profile photo"
+              class="w-full h-full object-cover"
+            />
+            <span v-else class="text-5xl">👤</span>
           </div>
 
           <!-- Profile Info -->
           <div class="p-4">
             <h3 class="font-bold text-gray-900 mb-1">{{ profile.name }}</h3>
-            <p class="text-sm text-gray-600 mb-2">{{ profile.age }}</p>
+            <p class="text-sm text-gray-600 mb-2">{{ profile.age ? `${profile.age} years` : 'Age N/A' }}</p>
             <p class="text-xs text-gray-500 mb-3">{{ profile.location }} • {{ profile.religion }}</p>
 
             <!-- Profile Details -->
             <div class="text-xs text-gray-600 mb-3 space-y-1">
               <p><span class="font-semibold">Height:</span> {{ profile.height }}</p>
               <p><span class="font-semibold">Occupation:</span> {{ profile.occupation }}</p>
+            </div>
+
+            <div v-if="profile.kundli" class="mb-3 rounded-md border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-800 space-y-0.5">
+              <p><span class="font-semibold">Kundli Match:</span> {{ profile.kundli.percentage ?? 0 }}%</p>
+              <p v-if="profile.kundli.guna_score !== null"><span class="font-semibold">Guna:</span> {{ profile.kundli.guna_score }}/{{ profile.kundli.guna_total || 36 }}</p>
+              <p v-if="profile.kundli.lagna"><span class="font-semibold">Lagna:</span> {{ profile.kundli.lagna }}</p>
             </div>
 
             <!-- Action Buttons -->
@@ -103,8 +127,23 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import MainLayout from '@/Layouts/MainLayout.vue';
+
+const props = defineProps({
+  profiles: {
+    type: Array,
+    default: () => [],
+  },
+  astrologyConfig: {
+    type: Object,
+    default: () => ({
+      enabled: false,
+      matchmakingEnabled: false,
+      normalMode: true,
+    }),
+  },
+});
 
 const filters = reactive({
   ageRange: '',
@@ -113,16 +152,8 @@ const filters = reactive({
   caste: '',
 });
 
-const profiles = ref([
-  { id: 1, name: 'Priya Sharma', age: '25 years', location: 'Mumbai', religion: 'Hindu', height: '5\'5"', occupation: 'Software Engineer' },
-  { id: 2, name: 'Anjali Patel', age: '23 years', location: 'Delhi', religion: 'Hindu', height: '5\'4"', occupation: 'Doctor' },
-  { id: 3, name: 'Neha Gupta', age: '27 years', location: 'Bangalore', religion: 'Hindu', height: '5\'6"', occupation: 'Designer' },
-  { id: 4, name: 'Kavya Singh', age: '24 years', location: 'Pune', religion: 'Hindu', height: '5\'5"', occupation: 'Finance' },
-  { id: 5, name: 'Meera Verma', age: '26 years', location: 'Hyderabad', religion: 'Hindu', height: '5\'4"', occupation: 'Manager' },
-  { id: 6, name: 'Isha Malhotra', age: '22 years', location: 'Gurgaon', religion: 'Hindu', height: '5\'7"', occupation: 'Student' },
-  { id: 7, name: 'Divya Nair', age: '28 years', location: 'Chennai', religion: 'Hindu', height: '5\'5"', occupation: 'Architect' },
-  { id: 8, name: 'Pooja Reddy', age: '25 years', location: 'Hyderabad', religion: 'Hindu', height: '5\'5"', occupation: 'HR' },
-]);
+const profiles = ref(Array.isArray(props.profiles) ? [...props.profiles] : []);
+const astrologyConfig = computed(() => props.astrologyConfig || { enabled: false, matchmakingEnabled: false, normalMode: true });
 
 const handleSearch = () => {
   console.log('Filters applied:', filters);

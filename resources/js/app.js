@@ -8,11 +8,15 @@ import Login from './Pages/Login.vue';
 import Register from './Pages/Register.vue';
 import ForgotPassword from './Pages/ForgotPassword.vue';
 import ResetPassword from './Pages/ResetPassword.vue';
+import VerifyEmail from './Pages/VerifyEmail.vue';
 import Dashboard from './Pages/Dashboard.vue';
 import Profiles from './Pages/Profiles.vue';
 import Pricing from './Pages/Pricing.vue';
 import AdminLogin from './Pages/Admin/Login.vue';
 import AdminDashboard from './Pages/Admin/Dashboard.vue';
+import AdminPricingPlans from './Pages/Admin/PricingPlans.vue';
+import AdminIntegrationSettings from './Pages/Admin/IntegrationSettings.vue';
+import AdminSubscriptions from './Pages/Admin/Subscriptions.vue';
 
 const pages = {
     Welcome,
@@ -21,11 +25,15 @@ const pages = {
     Register,
     ForgotPassword,
     ResetPassword,
+    VerifyEmail,
     Dashboard,
     Profiles,
     Pricing,
     'Admin/Login': AdminLogin,
     'Admin/Dashboard': AdminDashboard,
+    'Admin/PricingPlans': AdminPricingPlans,
+    'Admin/IntegrationSettings': AdminIntegrationSettings,
+    'Admin/Subscriptions': AdminSubscriptions,
 };
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Banjara Matrimonial';

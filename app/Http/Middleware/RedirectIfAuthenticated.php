@@ -23,6 +23,21 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                $user = Auth::guard($guard)->user();
+                $adminPath = trim((string) config('app.super_admin_path', ''), '/');
+
+                if ($user && in_array($user->role, ['admin', 'super_admin'], true)) {
+                    return redirect()->route('admin.dashboard');
+                }
+
+                if (
+                    $adminPath !== '' &&
+                    $request->is($adminPath . '/*') &&
+                    $user
+                ) {
+                    return redirect()->route('admin.dashboard');
+                }
+
                 return redirect(RouteServiceProvider::HOME);
             }
         }

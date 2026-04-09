@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserSubscription;
+use App\Support\AdminNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -17,7 +19,7 @@ class AdminController extends Controller
     public function showLogin()
     {
         return Inertia::render('Admin/Login', [
-            'loginAction' => url(trim(config('app.super_admin_path'), '/') . '/login'),
+            'loginAction' => route('admin.login.attempt', [], false),
         ]);
     }
 
@@ -51,12 +53,23 @@ class AdminController extends Controller
 
     public function dashboard()
     {
+        UserSubscription::expireEnded();
+
         $totalUsers = User::count();
         $verifiedUsers = User::whereNotNull('email_verified_at')->count();
         $profileCompletedUsers = User::where('profile_completion_step', '>=', 5)->count();
 
         return Inertia::render('Admin/Dashboard', [
-            'logoutAction' => url(trim(config('app.super_admin_path'), '/') . '/logout'),
+            'logoutAction' => route('admin.logout', [], false),
+            'pricingManagementUrl' => route('admin.pricing-plans.index', [], false),
+            'integrationSettingsUrl' => route('admin.integration-settings.index', [], false),
+            'subscriptionsUrl' => route('admin.subscriptions.index', [], false),
+            'sidebarMenus' => AdminNavigation::build([
+                'dashboardUrl' => route('admin.dashboard', [], false),
+                'pricingManagementUrl' => route('admin.pricing-plans.index', [], false),
+                'integrationSettingsUrl' => route('admin.integration-settings.index', [], false),
+                'subscriptionsUrl' => route('admin.subscriptions.index', [], false),
+            ]),
             'stats' => [
                 'totalUsers' => $totalUsers,
                 'verifiedUsers' => $verifiedUsers,
@@ -64,9 +77,15 @@ class AdminController extends Controller
                 'maleUsers' => User::where('gender', 'Male')->count(),
                 'femaleUsers' => User::where('gender', 'Female')->count(),
                 'adminUsers' => User::whereIn('role', self::ALLOWED_ADMIN_ROLES)->count(),
+                'activeSubscriptions' => UserSubscription::where('status', 'active')->count(),
+                'expiredSubscriptions' => UserSubscription::where('status', 'expired')->count(),
             ],
-            'recentUsers' => User::select('id', 'name', 'email', 'gender', 'role', 'created_at')
+            'recentUsers' => User::select('id', 'name', 'email', 'gender', 'role', 'email_verified_at', 'created_at')
                 ->latest()
+                ->limit(8)
+                ->get(),
+            'recentSubscriptions' => UserSubscription::with(['user:id,name,email', 'plan:id,name'])
+                ->latest('id')
                 ->limit(8)
                 ->get(),
         ]);
