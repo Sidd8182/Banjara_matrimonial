@@ -39,7 +39,7 @@
           <div>
             <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Super Admin</p>
             <h1 class="text-xl font-bold text-slate-900">User Subscription Monitor</h1>
-            <p class="text-xs text-slate-500 mt-1">Kaun sa user kaunsa plan use kar raha hai aur kab expire hoga.</p>
+            <p class="text-xs text-slate-500 mt-1">See which user is on which plan and when each subscription expires.</p>
           </div>
           <form @submit.prevent="logout">
             <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition">

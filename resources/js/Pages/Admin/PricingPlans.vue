@@ -84,15 +84,15 @@
         <section class="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-4">
           <article v-for="plan in localPlans" :key="plan.id" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input v-model="plan.name" type="text" class="field" />
-              <input v-model="plan.price" type="number" step="0.01" min="0" class="field" />
+              <input v-model="plan.name" type="text" class="field" placeholder="e.g., Premium Gold" />
+              <input v-model="plan.price" type="number" step="0.01" min="0" class="field" placeholder="e.g., 1499" />
               <select v-model="plan.billing_cycle" class="field">
                 <option value="monthly">Monthly</option>
                 <option value="quarterly">Quarterly</option>
                 <option value="yearly">Yearly</option>
                 <option value="lifetime">Lifetime</option>
               </select>
-              <input v-model="plan.sort_order" type="number" min="0" class="field" />
+              <input v-model="plan.sort_order" type="number" min="0" class="field" placeholder="e.g., 2" />
               <input v-model="plan.description" type="text" class="field md:col-span-2" placeholder="Description" />
               <div class="md:col-span-2 flex flex-wrap gap-3 text-xs text-slate-600">
                 <label class="inline-flex items-center gap-2"><input v-model="plan.is_active" type="checkbox" /> Active</label>

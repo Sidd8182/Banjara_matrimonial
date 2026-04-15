@@ -10,6 +10,8 @@ class AdminNavigation
         $pricingManagementUrl = $urls['pricingManagementUrl'] ?? '#';
         $integrationSettingsUrl = $urls['integrationSettingsUrl'] ?? '#';
         $subscriptionsUrl = $urls['subscriptionsUrl'] ?? '#';
+        $cmsPagesUrl = $urls['cmsPagesUrl'] ?? '#';
+        $cmsSectionsUrl = $urls['cmsSectionsUrl'] ?? '#';
 
         return [
             [
@@ -47,6 +49,23 @@ class AdminNavigation
                     ['label' => 'Payment Gateway Setting', 'url' => $integrationSettingsUrl . '#payment'],
                     ['label' => 'Push Notification Setting', 'url' => $integrationSettingsUrl . '#push'],
                     ['label' => 'Astrology Setting', 'url' => $integrationSettingsUrl . '#astrology'],
+                ],
+            ],
+            [
+                'label' => 'Website Settings',
+                'items' => [
+                    [
+                        'label' => 'Pages',
+                        'children' => [
+                            ['label' => 'All Pages', 'url' => $cmsPagesUrl],
+                        ],
+                    ],
+                    [
+                        'label' => 'Pages Section',
+                        'children' => [
+                            ['label' => 'All Section', 'url' => $cmsSectionsUrl],
+                        ],
+                    ],
                 ],
             ],
         ];

@@ -46,7 +46,7 @@
           <div>
             <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Super Admin</p>
             <h1 class="text-xl font-bold text-slate-900">Third-Party Integration Settings</h1>
-            <p class="text-xs text-slate-500 mt-1">Email, SMS, WhatsApp, Payment, Push aur Astrology integrations configure karein.</p>
+            <p class="text-xs text-slate-500 mt-1">Configure Email, SMS, WhatsApp, Payment, Push, and Astrology integrations.</p>
           </div>
           <form @submit.prevent="logout">
             <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition">
@@ -172,7 +172,7 @@
           </div>
 
           <p class="mt-2 text-[11px] text-slate-500">
-            Agar API key/provider configured nahi hai ya API fail hota hai, to project normal matchmaking mode me continue karega.
+            If the API key/provider is not configured or an API call fails, the project continues in normal matchmaking mode.
           </p>
         </section>
 
@@ -272,6 +272,27 @@ const logout = () => {
 
 const baseFieldClass = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-200';
 
+const settingsFieldExample = (label) => {
+  const text = String(label || '').toLowerCase();
+  if (text.includes('email')) {
+    return 'e.g., support@example.com';
+  }
+  if (text.includes('port')) {
+    return 'e.g., 587';
+  }
+  if (text.includes('host')) {
+    return 'e.g., smtp.example.com';
+  }
+  if (text.includes('url')) {
+    return 'e.g., https://api.example.com';
+  }
+  if (text.includes('timeout')) {
+    return 'e.g., 8';
+  }
+
+  return `e.g., ${label}`;
+};
+
 const Field = defineComponent({
   name: 'SettingsField',
   props: {
@@ -289,7 +310,7 @@ const Field = defineComponent({
           class: baseFieldClass,
           value: componentProps.modelValue,
           type: componentProps.type,
-          placeholder: componentProps.placeholder,
+          placeholder: componentProps.placeholder || settingsFieldExample(componentProps.label),
           onInput: (event) => emit('update:modelValue', event.target.value),
         }),
       ]);

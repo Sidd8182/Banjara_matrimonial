@@ -60,6 +60,8 @@ class IntegrationSettingsController extends Controller
                 'pricingManagementUrl' => route('admin.pricing-plans.index', [], false),
                 'integrationSettingsUrl' => route('admin.integration-settings.index', [], false),
                 'subscriptionsUrl' => route('admin.subscriptions.index', [], false),
+                'cmsPagesUrl' => route('admin.cms-pages.index', [], false),
+                'cmsSectionsUrl' => route('admin.cms-sections.index', [], false),
             ]),
         ]);
     }

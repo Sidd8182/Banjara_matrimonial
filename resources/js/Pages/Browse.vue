@@ -6,10 +6,10 @@
         class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-4 py-2.5 mb-4 text-sm"
       >
         <span v-if="astrologyConfig.matchmakingEnabled">
-          Astrology matchmaking active hai. Results kundli compatibility ke hisaab se rank kiye gaye hain.
+          Astrology matchmaking is active. Results are ranked by kundli compatibility.
         </span>
         <span v-else>
-          Astrology integration configured hai, lekin matchmaking abhi normal mode par hai.
+          Astrology integration is configured, but matchmaking is currently in normal mode.
         </span>
       </div>
 
@@ -86,7 +86,11 @@
 
           <!-- Profile Info -->
           <div class="p-4">
-            <h3 class="font-bold text-gray-900 mb-1">{{ profile.name }}</h3>
+            <h3 class="font-bold text-gray-900 mb-1">
+              <a :href="`/profiles/${profile.id}/view`" class="hover:underline text-blue-700">
+                {{ profile.name }}
+              </a>
+            </h3>
             <p class="text-sm text-gray-600 mb-2">{{ profile.age ? `${profile.age} years` : 'Age N/A' }}</p>
             <p class="text-xs text-gray-500 mb-3">{{ profile.location }} • {{ profile.religion }}</p>
 
@@ -97,8 +101,8 @@
             </div>
 
             <div v-if="profile.kundli" class="mb-3 rounded-md border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-800 space-y-0.5">
+              <p v-if="profile.kundli.guna_score !== null"><span class="font-semibold">Match Score:</span> {{ profile.kundli.guna_score }}/{{ profile.kundli.guna_total || 36 }}</p>
               <p><span class="font-semibold">Kundli Match:</span> {{ profile.kundli.percentage ?? 0 }}%</p>
-              <p v-if="profile.kundli.guna_score !== null"><span class="font-semibold">Guna:</span> {{ profile.kundli.guna_score }}/{{ profile.kundli.guna_total || 36 }}</p>
               <p v-if="profile.kundli.lagna"><span class="font-semibold">Lagna:</span> {{ profile.kundli.lagna }}</p>
             </div>
 
@@ -170,6 +174,6 @@ const skipProfile = (profileId) => {
 };
 
 const viewProfile = (profileId) => {
-  console.log('View profile:', profileId);
+  window.location.href = `/profiles/${profileId}/view`;
 };
 </script>

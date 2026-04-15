@@ -18,8 +18,11 @@ class PartnerPreference extends Model
         'religion_preference',
         'caste_preference',
         'location_preference',
+        'preferred_cities',
         'minimum_qualification',
+        'preferred_qualifications',
         'preferred_profession',
+        'preferred_professions',
         'income_expectation',
         'diet_preference',
         'smoking_preference',
@@ -31,6 +34,9 @@ class PartnerPreference extends Model
 
     protected $casts = [
         'relocate_preference' => 'boolean',
+        'preferred_cities' => 'array',
+        'preferred_qualifications' => 'array',
+        'preferred_professions' => 'array',
     ];
 
     public function profile()

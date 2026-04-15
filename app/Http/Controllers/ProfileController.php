@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\CareerDetail;
+use App\Models\City;
+use App\Models\Country;
 use App\Models\EducationDetail;
 use App\Models\FamilyDetail;
 use App\Models\HoroscopeDetail;
@@ -10,6 +12,7 @@ use App\Models\LifestyleDetail;
 use App\Models\MediaGallery;
 use App\Models\PartnerPreference;
 use App\Models\Profile;
+use App\Models\State;
 use App\Models\Verification;
 use App\Services\Astrology\AstrologyBirthDetailsService;
 use App\Support\SystemSettings;
@@ -50,11 +53,19 @@ class ProfileController extends Controller
         );
 
         $astrology = SystemSettings::astrology();
+        $initialLocationOptions = $this->resolveInitialLocationOptions(
+            (string) ($profile->country ?? ''),
+            (string) ($profile->state ?? '')
+        );
 
         return Inertia::render('Profiles', [
             'profileData' => $this->serializeProfile($profile),
             'updateStepUrl' => route('profiles.step.update', [], false),
             'autoFetchHoroscopeUrl' => route('profiles.horoscope.auto-fetch', [], false),
+            'locationOptionsUrls' => [
+                'states' => route('locations.states', [], false),
+                'cities' => route('locations.cities', [], false),
+            ],
             'masterData' => [
                 'rashis' => DB::table('rashi_master')
                     ->where('is_active', true)
@@ -66,6 +77,7 @@ class ProfileController extends Controller
                     ->orderBy('id')
                     ->pluck('name')
                     ->values(),
+                'locations' => $initialLocationOptions,
             ],
             'astrologyConfig' => [
                 'enabled' => data_get($astrology, 'enabled', false),
@@ -105,6 +117,75 @@ class ProfileController extends Controller
                 'nakshatra' => $this->normalizeMasterName('nakshatra_master', data_get($details, 'nakshatra')),
                 'lagna' => $this->normalizeMasterName('rashi_master', data_get($details, 'lagna')),
             ],
+        ]);
+    }
+
+    public function locationStates(Request $request)
+    {
+        $validated = $request->validate([
+            'country' => ['required', 'string', 'max:120'],
+        ]);
+
+        $country = Country::query()
+            ->where('is_active', true)
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower((string) $validated['country'])])
+            ->first();
+
+        if (!$country) {
+            return response()->json(['states' => []]);
+        }
+
+        $states = State::query()
+            ->where('country_id', $country->id)
+            ->where('is_active', true)
+            ->select('name')
+            ->distinct()
+            ->orderBy('name')
+            ->pluck('name')
+            ->values();
+
+        return response()->json([
+            'states' => $states,
+        ]);
+    }
+
+    public function locationCities(Request $request)
+    {
+        $validated = $request->validate([
+            'country' => ['required', 'string', 'max:120'],
+            'state' => ['required', 'string', 'max:120'],
+        ]);
+
+        $country = Country::query()
+            ->where('is_active', true)
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower((string) $validated['country'])])
+            ->first();
+
+        if (!$country) {
+            return response()->json(['cities' => []]);
+        }
+
+        $stateIds = State::query()
+            ->where('country_id', $country->id)
+            ->where('is_active', true)
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower((string) $validated['state'])])
+            ->pluck('id');
+
+        if ($stateIds->isEmpty()) {
+            return response()->json(['cities' => []]);
+        }
+
+        $cities = City::query()
+            ->whereIn('state_id', $stateIds)
+            ->where('is_active', true)
+            ->select('name')
+            ->distinct()
+            ->orderBy('name')
+            ->pluck('name')
+            ->values();
+
+        return response()->json([
+            'cities' => $cities,
         ]);
     }
 
@@ -179,7 +260,7 @@ class ProfileController extends Controller
         if ($step === 2) {
             return [
                 'step' => ['required', 'integer'],
-                'country' => ['required', 'string', 'max:100'],
+                'country' => ['required', 'string', 'max:100', Rule::exists('countries', 'name')->where('is_active', true)],
                 'state' => ['required', 'string', 'max:100'],
                 'city' => ['required', 'string', 'max:100'],
                 'area_locality' => ['nullable', 'string', 'max:120'],
@@ -288,8 +369,14 @@ class ProfileController extends Controller
                 'religion_preference' => ['nullable', 'string', 'max:120'],
                 'caste_preference' => ['nullable', 'string', 'max:120'],
                 'location_preference' => ['nullable', 'string', 'max:180'],
+                'preferred_cities' => ['nullable', 'array', 'max:20'],
+                'preferred_cities.*' => ['string', 'max:80', 'regex:/^[A-Za-z0-9][A-Za-z0-9 .,&\'-]*$/'],
                 'minimum_qualification' => ['nullable', 'string', 'max:120'],
+                'preferred_qualifications' => ['nullable', 'array', 'max:15'],
+                'preferred_qualifications.*' => ['string', 'max:120', 'regex:/^[A-Za-z0-9][A-Za-z0-9 .,&\'-]*$/'],
                 'preferred_profession' => ['nullable', 'string', 'max:120'],
+                'preferred_professions' => ['nullable', 'array', 'max:15'],
+                'preferred_professions.*' => ['string', 'max:120', 'regex:/^[A-Za-z0-9][A-Za-z0-9 .,&\'-]*$/'],
                 'income_expectation' => ['nullable', 'string', 'max:80'],
                 'diet_preference' => ['nullable', Rule::in(['Veg', 'Non-Veg', 'Jain', 'Any'])],
                 'smoking_preference' => ['nullable', Rule::in(['No', 'Occasionally', 'Yes', 'Any'])],
@@ -332,7 +419,97 @@ class ProfileController extends Controller
                     $innerValidator->errors()->add('height_max_cm', 'Maximum height must be greater than or equal to minimum height.');
                 }
             }
+
+            if ($step === 2) {
+                $country = Country::query()
+                    ->where('is_active', true)
+                    ->whereRaw('LOWER(name) = ?', [mb_strtolower((string) ($data['country'] ?? ''))])
+                    ->first();
+
+                if (!$country) {
+                    $innerValidator->errors()->add('country', 'Please select a valid country.');
+                    return;
+                }
+
+                $stateIds = State::query()
+                    ->where('country_id', $country->id)
+                    ->where('is_active', true)
+                    ->whereRaw('LOWER(name) = ?', [mb_strtolower((string) ($data['state'] ?? ''))])
+                    ->pluck('id');
+
+                if ($stateIds->isEmpty()) {
+                    $innerValidator->errors()->add('state', 'Selected state is not valid for the chosen country.');
+                    return;
+                }
+
+                $cityExists = City::query()
+                    ->where('country_id', $country->id)
+                    ->whereIn('state_id', $stateIds)
+                    ->where('is_active', true)
+                    ->whereRaw('LOWER(name) = ?', [mb_strtolower((string) ($data['city'] ?? ''))])
+                    ->exists();
+
+                if (!$cityExists) {
+                    $innerValidator->errors()->add('city', 'Selected city is not valid for the chosen state.');
+                }
+            }
         });
+    }
+
+    private function resolveInitialLocationOptions(string $countryName, string $stateName): array
+    {
+        $countries = Country::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->pluck('name')
+            ->values();
+
+        $states = collect();
+        $cities = collect();
+
+        if ($countryName !== '') {
+            $country = Country::query()
+                ->where('is_active', true)
+                ->whereRaw('LOWER(name) = ?', [mb_strtolower($countryName)])
+                ->first();
+
+            if ($country) {
+                $states = State::query()
+                    ->where('country_id', $country->id)
+                    ->where('is_active', true)
+                    ->select('name')
+                    ->distinct()
+                    ->orderBy('name')
+                    ->pluck('name')
+                    ->values();
+
+                if ($stateName !== '') {
+                    $stateIds = State::query()
+                        ->where('country_id', $country->id)
+                        ->where('is_active', true)
+                        ->whereRaw('LOWER(name) = ?', [mb_strtolower($stateName)])
+                        ->pluck('id');
+
+                    if ($stateIds->isNotEmpty()) {
+                        $cities = City::query()
+                            ->where('country_id', $country->id)
+                            ->whereIn('state_id', $stateIds)
+                            ->where('is_active', true)
+                            ->select('name')
+                            ->distinct()
+                            ->orderBy('name')
+                            ->pluck('name')
+                            ->values();
+                    }
+                }
+            }
+        }
+
+        return [
+            'countries' => $countries,
+            'states' => $states,
+            'cities' => $cities,
+        ];
     }
 
     private function saveBasicInformation(Request $request, Profile $profile, array $validated): void
@@ -530,6 +707,25 @@ class ProfileController extends Controller
 
     private function savePartnerPreferences(Profile $profile, array $validated): void
     {
+        $preferredCities = $this->normalizePreferenceList($validated['preferred_cities'] ?? []);
+        $preferredQualifications = $this->normalizePreferenceList($validated['preferred_qualifications'] ?? []);
+        $preferredProfessions = $this->normalizePreferenceList($validated['preferred_professions'] ?? []);
+
+        $legacyLocationPreference = $validated['location_preference'] ?? null;
+        if (!$legacyLocationPreference && !empty($preferredCities)) {
+            $legacyLocationPreference = $preferredCities[0];
+        }
+
+        $legacyMinimumQualification = $validated['minimum_qualification'] ?? null;
+        if (!$legacyMinimumQualification && !empty($preferredQualifications)) {
+            $legacyMinimumQualification = $preferredQualifications[0];
+        }
+
+        $legacyPreferredProfession = $validated['preferred_profession'] ?? null;
+        if (!$legacyPreferredProfession && !empty($preferredProfessions)) {
+            $legacyPreferredProfession = $preferredProfessions[0];
+        }
+
         PartnerPreference::updateOrCreate(
             ['profile_id' => $profile->id],
             [
@@ -539,9 +735,12 @@ class ProfileController extends Controller
                 'height_max_cm' => $validated['height_max_cm'] ?? null,
                 'religion_preference' => $validated['religion_preference'] ?? null,
                 'caste_preference' => $validated['caste_preference'] ?? null,
-                'location_preference' => $validated['location_preference'] ?? null,
-                'minimum_qualification' => $validated['minimum_qualification'] ?? null,
-                'preferred_profession' => $validated['preferred_profession'] ?? null,
+                'location_preference' => $legacyLocationPreference,
+                'preferred_cities' => $preferredCities,
+                'minimum_qualification' => $legacyMinimumQualification,
+                'preferred_qualifications' => $preferredQualifications,
+                'preferred_profession' => $legacyPreferredProfession,
+                'preferred_professions' => $preferredProfessions,
                 'income_expectation' => $validated['income_expectation'] ?? null,
                 'diet_preference' => $validated['diet_preference'] ?? null,
                 'smoking_preference' => $validated['smoking_preference'] ?? null,
@@ -686,8 +885,14 @@ class ProfileController extends Controller
                 'religion_preference' => $profile->partnerPreference->religion_preference ?? null,
                 'caste_preference' => $profile->partnerPreference->caste_preference ?? null,
                 'location_preference' => $profile->partnerPreference->location_preference ?? null,
+                'preferred_cities' => $profile->partnerPreference->preferred_cities
+                    ?? $this->normalizePreferenceList([$profile->partnerPreference->location_preference ?? null]),
                 'minimum_qualification' => $profile->partnerPreference->minimum_qualification ?? null,
+                'preferred_qualifications' => $profile->partnerPreference->preferred_qualifications
+                    ?? $this->normalizePreferenceList([$profile->partnerPreference->minimum_qualification ?? null]),
                 'preferred_profession' => $profile->partnerPreference->preferred_profession ?? null,
+                'preferred_professions' => $profile->partnerPreference->preferred_professions
+                    ?? $this->normalizePreferenceList([$profile->partnerPreference->preferred_profession ?? null]),
                 'income_expectation' => $profile->partnerPreference->income_expectation ?? null,
                 'diet_preference' => $profile->partnerPreference->diet_preference ?? null,
                 'smoking_preference' => $profile->partnerPreference->smoking_preference ?? null,
@@ -707,6 +912,24 @@ class ProfileController extends Controller
                 'email_verified' => (bool) ($profile->verification->email_verified ?? false),
             ],
         ];
+    }
+
+    private function normalizePreferenceList(array $values): array
+    {
+        $cleaned = collect($values)
+            ->map(function ($value) {
+                return trim((string) $value);
+            })
+            ->filter(function ($value) {
+                return $value !== '';
+            })
+            ->unique(function ($value) {
+                return mb_strtolower($value);
+            })
+            ->values()
+            ->all();
+
+        return $cleaned;
     }
 
     private function extractFirstName(string $name): ?string

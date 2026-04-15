@@ -1,216 +1,243 @@
 <template>
-  <MainLayout>
-    <section class="rounded-3xl bg-gradient-to-r from-rose-600 via-red-600 to-orange-500 text-white p-6 sm:p-10 shadow-lg">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div class="lg:col-span-2">
-          <p class="text-white/80 text-sm uppercase tracking-wide">Personalized Dashboard</p>
-          <h1 class="mt-2 text-3xl sm:text-4xl font-extrabold">Welcome back, {{ userName }}!</h1>
-          <p class="mt-3">
-            <span class="inline-flex items-center rounded-full border border-white/40 bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-              {{ membershipBadgeLabel }}
-            </span>
-          </p>
-          <p class="mt-3 text-white/90 max-w-2xl">
-            Your compatible matches are ready. Complete your profile to improve match quality and response rate.
-          </p>
-
-          <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="rounded-xl bg-white/15 p-3">
-              <p class="text-2xl font-bold">126</p>
-              <p class="text-xs text-white/85">Profile Views</p>
-            </div>
-            <div class="rounded-xl bg-white/15 p-3">
-              <p class="text-2xl font-bold">24</p>
-              <p class="text-xs text-white/85">New Matches</p>
-            </div>
-            <div class="rounded-xl bg-white/15 p-3">
-              <p class="text-2xl font-bold">9</p>
-              <p class="text-xs text-white/85">New Messages</p>
-            </div>
-            <div class="rounded-xl bg-white/15 p-3">
-              <p class="text-2xl font-bold">87%</p>
-              <p class="text-xs text-white/85">Profile Strength</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-2xl bg-white text-gray-900 p-5 shadow-md">
-          <div class="flex items-center gap-3">
-            <img
-              :src="profileImageUrl"
-              alt="Profile"
-              class="h-16 w-16 rounded-full border border-gray-200 object-cover"
-            />
-            <div>
-              <h2 class="text-lg font-bold">{{ profileDisplayName }}</h2>
-              <p class="text-xs text-gray-500">{{ profileIdLabel }}</p>
-            </div>
-          </div>
-          <p class="text-sm text-gray-600 mt-3">Complete remaining details to boost visibility.</p>
-          <div class="mt-4 h-3 w-full rounded-full bg-gray-200 overflow-hidden">
-            <div class="h-full bg-gradient-to-r from-emerald-500 to-lime-500" :style="{ width: `${profileCompletionPercent}%` }"></div>
-          </div>
-          <p class="mt-2 text-sm font-semibold text-emerald-600">{{ profileCompletionPercent }}% completed</p>
-          <a href="/profiles" class="mt-4 inline-block w-full text-center rounded-lg bg-primary text-white py-2.5 font-semibold hover:bg-red-700 transition">
-            Complete Profile
-          </a>
-          <a href="#my-media" class="mt-2 inline-block w-full text-center rounded-lg border border-gray-300 text-gray-700 py-2.5 font-semibold hover:bg-gray-50 transition">
-            View Uploaded Media
-          </a>
-        </div>
-      </div>
+  <UserDashboardLayout active-module="overview">
+    <section class="grid grid-cols-2 gap-3 xl:grid-cols-6">
+      <article class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+        <p class="text-[11px] text-slate-500">Membership</p>
+        <p class="mt-1 text-sm font-bold text-slate-900">{{ membershipBadgeLabel }}</p>
+      </article>
+      <article class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+        <p class="text-[11px] text-slate-500">Profile Completion</p>
+        <p class="mt-1 text-2xl font-bold text-emerald-600">{{ profileCompletionPercent }}%</p>
+      </article>
+      <article class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+        <p class="text-[11px] text-slate-500">Received Pending</p>
+        <p class="mt-1 text-2xl font-bold text-amber-600">{{ requestStats.received_pending }}</p>
+      </article>
+      <article class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+        <p class="text-[11px] text-slate-500">Sent Pending</p>
+        <p class="mt-1 text-2xl font-bold text-sky-600">{{ requestStats.sent_pending }}</p>
+      </article>
+      <article class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+        <p class="text-[11px] text-slate-500">Sent Accepted</p>
+        <p class="mt-1 text-2xl font-bold text-emerald-600">{{ requestStats.sent_accepted }}</p>
+      </article>
+      <article class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+        <p class="text-[11px] text-slate-500">Sent Rejected</p>
+        <p class="mt-1 text-2xl font-bold text-rose-600">{{ requestStats.sent_rejected }}</p>
+      </article>
     </section>
 
-    <section class="mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6">
-      <div class="xl:col-span-2 rounded-2xl bg-white border border-gray-200 p-6 shadow-sm">
-        <div class="flex items-center justify-between mb-5">
-          <h3 class="text-2xl font-bold text-gray-900">Recommended Matches</h3>
-          <a href="/browse" class="text-primary font-semibold hover:underline">View all</a>
+    <section class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <article class="xl:col-span-2 rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+          <h3 class="text-sm font-bold text-slate-900">Recommended Matches Table</h3>
+          <a href="/browse" class="text-xs font-semibold text-indigo-600 hover:underline">Open Browse</a>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <article v-for="profile in recommendedProfiles" :key="profile.name" class="rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
-            <div class="h-36 rounded-xl" :class="profile.bgClass"></div>
-            <h4 class="mt-3 font-bold text-gray-900">{{ profile.name }}, {{ profile.age }}</h4>
-            <p class="text-sm text-gray-600">{{ profile.city }} • {{ profile.profession }}</p>
-            <p class="mt-2 text-xs font-semibold text-emerald-600">{{ profile.compatibility }}% Match</p>
-            <div class="mt-3 flex gap-2">
-              <button class="flex-1 rounded-md border border-red-200 text-red-600 py-2 text-sm hover:bg-red-50 transition">Skip</button>
-              <button class="flex-1 rounded-md bg-primary text-white py-2 text-sm hover:bg-red-700 transition">Connect</button>
-            </div>
-          </article>
+        <div class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead class="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500">
+              <tr>
+                <th class="px-4 py-2 text-left">Profile</th>
+                <th class="px-4 py-2 text-left">Location</th>
+                <th class="px-4 py-2 text-left">Profession</th>
+                <th class="px-4 py-2 text-left">Compatibility</th>
+                <th class="px-4 py-2 text-left">Request Status</th>
+                <th class="px-4 py-2 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-[12px]">
+              <tr v-for="profile in recommendedProfiles.slice(0, 12)" :key="profile.id" class="hover:bg-slate-50/70">
+                <td class="px-4 py-2.5 font-semibold text-slate-900">
+                  <a :href="`/profiles/${profile.id}/view`" class="text-blue-700 hover:underline">
+                    {{ profile.name }}<span v-if="profile.age">, {{ profile.age }}</span>
+                  </a>
+                </td>
+                <td class="px-4 py-2.5 text-slate-600">{{ profile.city }}</td>
+                <td class="px-4 py-2.5 text-slate-600">{{ profile.profession }}</td>
+                <td class="px-4 py-2.5 font-semibold text-emerald-700">{{ profile.compatibility }}%</td>
+                <td class="px-4 py-2.5 text-xs font-semibold" :class="requestStatusClass(profile.request_status)">
+                  {{ requestStatusLabel(profile.request_status) }}
+                </td>
+                <td class="px-4 py-2.5">
+                  <div class="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      class="rounded-md border border-rose-200 px-3 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60"
+                      :disabled="isActionLoading(profile.id)"
+                      @click="submitMatchAction(profile.id, 'skip')"
+                    >
+                      Skip
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded-md bg-indigo-600 px-3 py-1 text-[11px] font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+                      :disabled="isActionLoading(profile.id)"
+                      @click="submitMatchAction(profile.id, 'connect')"
+                    >
+                      Connect
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="!recommendedProfiles.length">
+                <td colspan="6" class="px-4 py-6 text-center text-xs text-slate-500">No recommended matches available.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
+      </article>
 
-      <div class="rounded-2xl bg-white border border-gray-200 p-6 shadow-sm">
-        <h3 class="text-xl font-bold text-gray-900">Recent Activity</h3>
-        <ul class="mt-4 space-y-4">
-          <li v-for="activity in recentActivities" :key="activity.text" class="flex items-start gap-3">
-            <span class="mt-1 h-2.5 w-2.5 rounded-full" :class="activity.dot"></span>
-            <div>
-              <p class="text-sm font-semibold text-gray-900">{{ activity.text }}</p>
-              <p class="text-xs text-gray-500 mt-1">{{ activity.time }}</p>
-            </div>
-          </li>
-        </ul>
-
-        <div class="mt-6 rounded-xl bg-gradient-to-r from-indigo-50 to-sky-50 border border-indigo-100 p-4">
-          <p class="text-sm font-bold text-gray-900">Premium Insight</p>
-          <p class="text-sm text-gray-600 mt-1">Members with full profiles get 3.2x more responses.</p>
-          <a href="/pricing" class="mt-3 inline-block text-sm font-semibold text-indigo-600 hover:underline">Upgrade Plan</a>
+      <article class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 px-4 py-3">
+          <h3 class="text-sm font-bold text-slate-900">Profile Summary Table</h3>
         </div>
-      </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full">
+            <tbody class="divide-y divide-slate-100 text-[12px]">
+              <tr>
+                <td class="px-4 py-2.5 text-slate-500">Name</td>
+                <td class="px-4 py-2.5 font-semibold text-slate-900">{{ profileDisplayName }}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5 text-slate-500">Profile ID</td>
+                <td class="px-4 py-2.5 font-semibold text-slate-900">{{ profileIdLabel }}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5 text-slate-500">Membership Status</td>
+                <td class="px-4 py-2.5 font-semibold text-slate-900">{{ membershipStatusLabel }}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5 text-slate-500">Plan</td>
+                <td class="px-4 py-2.5 font-semibold text-slate-900">{{ membershipPlanLabel }}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5 text-slate-500">Valid Till</td>
+                <td class="px-4 py-2.5 font-semibold text-slate-900">{{ membershipEndDateLabel || 'N/A' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
     </section>
 
     <section class="mt-8 rounded-2xl bg-white border border-gray-200 p-6 shadow-sm">
-      <div class="mb-5 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
-        <p class="text-xs uppercase tracking-wide text-indigo-700 font-semibold">Membership Status</p>
-        <p class="mt-1 text-lg font-bold text-gray-900">{{ membershipStatusLabel }}</p>
-        <p class="mt-1 text-sm text-gray-600">
-          {{ membershipPlanLabel }}
-          <span v-if="membershipEndDateLabel"> • Valid till {{ membershipEndDateLabel }}</span>
-        </p>
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h3 class="text-2xl font-bold text-gray-900">Request Preview (Tabular)</h3>
+        <a
+          href="/dashboard/requests"
+          class="inline-flex items-center justify-center rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+        >
+          Open Full Request Center
+        </a>
       </div>
 
-      <div id="my-media" class="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-4">
-        <div class="flex items-center justify-between gap-3 mb-3">
-          <h3 class="text-lg font-bold text-gray-900">My Uploaded Media</h3>
-          <a href="/profiles" class="text-sm font-semibold text-primary hover:underline">Edit Media</a>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="rounded-lg border border-gray-200 bg-white p-3">
-            <div class="mb-2 flex items-center justify-between gap-2">
-              <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Photo Gallery ({{ allMediaImages.length }})</p>
-              <button
-                type="button"
-                class="rounded-md border border-indigo-200 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 disabled:opacity-50"
-                :disabled="!allMediaImages.length"
-                @click="openGalleryModal(0)"
-              >
-                View Slideshow
-              </button>
-            </div>
-
-            <div v-if="allMediaImages.length" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <button
-                v-for="(item, index) in allMediaImages.slice(0, 6)"
-                :key="item.id"
-                type="button"
-                class="group relative overflow-hidden rounded-lg border border-gray-200"
-                @click="openGalleryModal(index)"
-              >
-                <img :src="item.url" alt="Gallery" class="h-24 w-full object-cover transition group-hover:scale-105" />
-                <span class="absolute inset-0 hidden items-center justify-center bg-black/35 text-xs font-semibold text-white group-hover:flex">View</span>
-              </button>
-            </div>
-
-            <div v-else class="h-40 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm flex items-center justify-center">
-              Abhi tak image upload nahi hui hai.
-            </div>
+      <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <article class="rounded-xl border border-gray-200">
+          <div class="border-b border-gray-200 px-4 py-3">
+            <h4 class="text-sm font-bold text-gray-900">Incoming Requests ({{ incomingRequests.length }})</h4>
           </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full">
+              <thead class="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-500">
+                <tr>
+                  <th class="px-3 py-2 text-left">Name</th>
+                  <th class="px-3 py-2 text-left">City</th>
+                  <th class="px-3 py-2 text-left">Status</th>
+                  <th class="px-3 py-2 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 text-[12px]">
+                <tr v-for="request in incomingRequests" :key="`incoming-${request.profile_id}`">
+                  <td class="px-3 py-2">{{ request.name }}</td>
+                  <td class="px-3 py-2">{{ request.city }}</td>
+                  <td class="px-3 py-2" :class="requestStatusClass(request.status)">{{ requestStatusLabel(request.status) }}</td>
+                  <td class="px-3 py-2">
+                    <div class="flex justify-end gap-2">
+                      <a :href="`/profiles/${request.profile_id}/view`" class="rounded border border-gray-300 px-2 py-1 text-[11px] font-semibold text-gray-700 hover:bg-gray-50">View</a>
+                      <button
+                        v-if="request.status === 'pending'"
+                        type="button"
+                        class="rounded bg-emerald-600 px-2 py-1 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                        :disabled="isActionLoading(request.profile_id)"
+                        @click="submitMatchAction(request.profile_id, 'connect')"
+                      >
+                        Accept
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-if="!incomingRequests.length">
+                  <td colspan="4" class="px-3 py-4 text-center text-xs text-gray-500">No incoming requests.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
 
-          <div class="rounded-lg border border-gray-200 bg-white p-3">
-            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Video Intro</p>
-            <video v-if="videoIntroUrl" :src="videoIntroUrl" controls class="h-40 w-full rounded-lg border border-gray-200 bg-black"></video>
-            <div v-else class="h-40 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm flex items-center justify-center">
-              Video intro upload nahi hua hai.
-            </div>
+        <article class="rounded-xl border border-gray-200">
+          <div class="border-b border-gray-200 px-4 py-3">
+            <h4 class="text-sm font-bold text-gray-900">Outgoing Requests ({{ outgoingRequests.length }})</h4>
           </div>
-        </div>
-
-        <div class="mt-4 rounded-lg border border-gray-200 bg-white p-3">
-          <div class="mb-2 flex items-center justify-between gap-2">
-            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Gallery Images ({{ galleryItems.length }})</p>
-            <button
-              type="button"
-              class="rounded-md border border-indigo-200 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 disabled:opacity-50"
-              :disabled="!allMediaImages.length"
-              @click="openGalleryModal(0)"
-            >
-              View
-            </button>
+          <div class="overflow-x-auto">
+            <table class="min-w-full">
+              <thead class="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-500">
+                <tr>
+                  <th class="px-3 py-2 text-left">Name</th>
+                  <th class="px-3 py-2 text-left">City</th>
+                  <th class="px-3 py-2 text-left">Status</th>
+                  <th class="px-3 py-2 text-right">View</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 text-[12px]">
+                <tr v-for="request in outgoingRequests" :key="`outgoing-${request.profile_id}`">
+                  <td class="px-3 py-2">{{ request.name }}</td>
+                  <td class="px-3 py-2">{{ request.city }}</td>
+                  <td class="px-3 py-2" :class="requestStatusClass(request.status)">{{ requestStatusLabel(request.status) }}</td>
+                  <td class="px-3 py-2 text-right">
+                    <a :href="`/profiles/${request.profile_id}/view`" class="rounded border border-gray-300 px-2 py-1 text-[11px] font-semibold text-gray-700 hover:bg-gray-50">Open</a>
+                  </td>
+                </tr>
+                <tr v-if="!outgoingRequests.length">
+                  <td colspan="4" class="px-3 py-4 text-center text-xs text-gray-500">No outgoing requests.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div v-if="galleryItems.length" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-            <button
-              v-for="item in galleryItems"
-              :key="item.id"
-              type="button"
-              class="group relative overflow-hidden rounded-lg border border-gray-200"
-              @click="openGalleryByUrl(item.url)"
-            >
-              <img
-                :src="item.url"
-                alt="Gallery"
-                class="h-24 w-full object-cover transition group-hover:scale-105"
-              />
-              <span class="absolute inset-0 hidden items-center justify-center bg-black/35 text-xs font-semibold text-white group-hover:flex">View</span>
-            </button>
-          </div>
-          <p v-else class="text-sm text-gray-500">Gallery images upload nahi hui hain.</p>
-        </div>
+        </article>
       </div>
+    </section>
 
-      <div class="flex items-center justify-between mb-5">
-        <h3 class="text-2xl font-bold text-gray-900">Quick Actions</h3>
+    <section class="mt-4 rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-200 px-4 py-3">
+        <h3 class="text-sm font-bold text-slate-900">Module Navigation Table</h3>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <a href="/browse" class="rounded-xl border border-gray-200 p-4 hover:bg-rose-50 transition">
-          <p class="text-lg font-bold text-gray-900">Browse Profiles</p>
-          <p class="text-sm text-gray-600 mt-1">Discover new matches by filters</p>
-        </a>
-        <a href="/messages" class="rounded-xl border border-gray-200 p-4 hover:bg-orange-50 transition">
-          <p class="text-lg font-bold text-gray-900">Messages</p>
-          <p class="text-sm text-gray-600 mt-1">Reply to pending conversations</p>
-        </a>
-        <a href="/profiles" class="rounded-xl border border-gray-200 p-4 hover:bg-emerald-50 transition">
-          <p class="text-lg font-bold text-gray-900">My Profile</p>
-          <p class="text-sm text-gray-600 mt-1">Update details and preferences</p>
-        </a>
-        <a href="/pricing" class="rounded-xl border border-gray-200 p-4 hover:bg-indigo-50 transition">
-          <p class="text-lg font-bold text-gray-900">Membership</p>
-          <p class="text-sm text-gray-600 mt-1">Compare plans and benefits</p>
-        </a>
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead class="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500">
+            <tr>
+              <th class="px-4 py-2 text-left">Module</th>
+              <th class="px-4 py-2 text-left">Purpose</th>
+              <th class="px-4 py-2 text-right">Open</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-[12px]">
+            <tr>
+              <td class="px-4 py-2.5 font-semibold text-slate-900">Profile</td>
+              <td class="px-4 py-2.5 text-slate-600">Update personal profile details and media.</td>
+              <td class="px-4 py-2.5 text-right"><a href="/profiles" class="text-indigo-700 hover:underline">Open</a></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-semibold text-slate-900">Request Center</td>
+              <td class="px-4 py-2.5 text-slate-600">Manage incoming and outgoing connection requests.</td>
+              <td class="px-4 py-2.5 text-right"><a href="/dashboard/requests" class="text-indigo-700 hover:underline">Open</a></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-semibold text-slate-900">Membership</td>
+              <td class="px-4 py-2.5 text-slate-600">Upgrade plan and manage premium access.</td>
+              <td class="px-4 py-2.5 text-right"><a href="/pricing" class="text-indigo-700 hover:underline">Open</a></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
@@ -252,13 +279,13 @@
         </div>
       </div>
     </div>
-  </MainLayout>
+  </UserDashboardLayout>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import MainLayout from '@/Layouts/MainLayout.vue';
+import UserDashboardLayout from '@/Layouts/UserDashboardLayout.vue';
 
 const props = defineProps({
   subscription: {
@@ -269,7 +296,35 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  recommendedProfiles: {
+    type: Array,
+    default: () => [],
+  },
+  requestOverview: {
+    type: Object,
+    default: () => ({
+      stats: {},
+      incoming: [],
+      outgoing: [],
+    }),
+  },
 });
+
+const requestStats = ref({
+  received_total: 0,
+  received_pending: 0,
+  received_accepted: 0,
+  received_rejected: 0,
+  sent_total: 0,
+  sent_pending: 0,
+  sent_accepted: 0,
+  sent_rejected: 0,
+  ...(props.requestOverview?.stats || {}),
+});
+
+const incomingRequests = ref(Array.isArray(props.requestOverview?.incoming) ? [...props.requestOverview.incoming] : []);
+const outgoingRequests = ref(Array.isArray(props.requestOverview?.outgoing) ? [...props.requestOverview.outgoing] : []);
+const actionLoadingMap = ref({});
 
 const page = usePage();
 const userName = computed(() => page.props.auth?.user?.name || 'Member');
@@ -482,14 +537,142 @@ const profileCompletionPercent = computed(() => {
 const profileDisplayName = computed(() => props.dashboardProfile?.full_name || userName.value);
 const profileIdLabel = computed(() => props.dashboardProfile?.profile_id ? `ID: ${props.dashboardProfile.profile_id}` : 'ID: Not generated yet');
 
-const recommendedProfiles = [
-  { name: 'Priyanka', age: 27, city: 'Pune', profession: 'Software Engineer', compatibility: 92, bgClass: 'bg-gradient-to-br from-rose-100 to-amber-100' },
-  { name: 'Aarav', age: 30, city: 'Bengaluru', profession: 'Architect', compatibility: 89, bgClass: 'bg-gradient-to-br from-sky-100 to-indigo-100' },
-  { name: 'Neha', age: 26, city: 'Ahmedabad', profession: 'Doctor', compatibility: 94, bgClass: 'bg-gradient-to-br from-emerald-100 to-lime-100' },
-  { name: 'Rohit', age: 29, city: 'Jaipur', profession: 'Business Owner', compatibility: 86, bgClass: 'bg-gradient-to-br from-orange-100 to-rose-100' },
-  { name: 'Meera', age: 25, city: 'Mumbai', profession: 'CA', compatibility: 88, bgClass: 'bg-gradient-to-br from-purple-100 to-fuchsia-100' },
-  { name: 'Karan', age: 31, city: 'Delhi', profession: 'Product Manager', compatibility: 90, bgClass: 'bg-gradient-to-br from-cyan-100 to-teal-100' },
-];
+const recommendedProfiles = ref(Array.isArray(props.recommendedProfiles) ? [...props.recommendedProfiles] : []);
+
+const requestStatusLabel = (status) => {
+  const current = String(status || 'none').toLowerCase();
+  if (current === 'accepted') return 'Accepted';
+  if (current === 'rejected') return 'Rejected';
+  if (current === 'pending') return 'Pending';
+  if (current === 'skipped') return 'Skipped';
+  return 'Not Sent';
+};
+
+const requestStatusClass = (status) => {
+  const current = String(status || 'none').toLowerCase();
+  if (current === 'accepted') return 'text-emerald-700';
+  if (current === 'rejected') return 'text-rose-700';
+  if (current === 'pending') return 'text-sky-700';
+  if (current === 'skipped') return 'text-amber-700';
+  return 'text-gray-600';
+};
+
+const isActionLoading = (profileId) => Boolean(actionLoadingMap.value[profileId]);
+
+const deriveOutgoingStatus = (profileId) => {
+  const outgoing = outgoingRequests.value.find((item) => Number(item.profile_id) === Number(profileId));
+  return outgoing?.status || 'none';
+};
+
+const recalculateStats = () => {
+  requestStats.value = {
+    received_total: incomingRequests.value.length,
+    received_pending: incomingRequests.value.filter((item) => item.status === 'pending').length,
+    received_accepted: incomingRequests.value.filter((item) => item.status === 'accepted').length,
+    received_rejected: incomingRequests.value.filter((item) => item.status === 'rejected').length,
+    sent_total: outgoingRequests.value.length,
+    sent_pending: outgoingRequests.value.filter((item) => item.status === 'pending').length,
+    sent_accepted: outgoingRequests.value.filter((item) => item.status === 'accepted').length,
+    sent_rejected: outgoingRequests.value.filter((item) => item.status === 'rejected').length,
+  };
+};
+
+const syncRecommendedStatuses = () => {
+  recommendedProfiles.value = recommendedProfiles.value.map((profile) => {
+    const nextStatus = deriveOutgoingStatus(profile.id);
+    if (nextStatus === 'none') {
+      return profile;
+    }
+
+    return {
+      ...profile,
+      request_status: nextStatus,
+    };
+  });
+};
+
+const submitMatchAction = async (targetProfileId, action, rejectionReason = null) => {
+  if (!targetProfileId || !['connect', 'skip'].includes(action)) {
+    return;
+  }
+
+  actionLoadingMap.value = {
+    ...actionLoadingMap.value,
+    [targetProfileId]: true,
+  };
+
+  try {
+    await window.axios.post('/dashboard/match-action', {
+      target_profile_id: targetProfileId,
+      action,
+      rejection_reason: action === 'skip' ? rejectionReason : null,
+    });
+
+    if (action === 'connect') {
+      const currentOutgoing = outgoingRequests.value.find((item) => Number(item.profile_id) === Number(targetProfileId));
+      if (!currentOutgoing) {
+        const targetProfile = recommendedProfiles.value.find((item) => Number(item.id) === Number(targetProfileId));
+        if (targetProfile) {
+          outgoingRequests.value.unshift({
+            profile_id: Number(targetProfile.id),
+            name: targetProfile.name,
+            city: targetProfile.city,
+            profession: targetProfile.profession,
+            profile_picture_url: targetProfile.profile_picture_url || null,
+            requested_at: new Date().toISOString(),
+            status: 'pending',
+            rejection_reason: null,
+          });
+        }
+      } else {
+        currentOutgoing.status = 'pending';
+        currentOutgoing.rejection_reason = null;
+      }
+
+      const incomingItem = incomingRequests.value.find((item) => Number(item.profile_id) === Number(targetProfileId));
+      if (incomingItem && incomingItem.status === 'pending') {
+        incomingItem.status = 'accepted';
+        incomingItem.rejection_reason = null;
+      }
+    }
+
+    if (action === 'skip') {
+      const outgoingItem = outgoingRequests.value.find((item) => Number(item.profile_id) === Number(targetProfileId));
+      if (outgoingItem && outgoingItem.status === 'pending') {
+        outgoingItem.status = 'rejected';
+        outgoingItem.rejection_reason = rejectionReason || 'No reason provided.';
+      }
+
+      const incomingItem = incomingRequests.value.find((item) => Number(item.profile_id) === Number(targetProfileId));
+      if (incomingItem && incomingItem.status === 'pending') {
+        incomingItem.status = 'rejected';
+        incomingItem.rejection_reason = rejectionReason || 'No reason provided.';
+      }
+    }
+
+    recalculateStats();
+    syncRecommendedStatuses();
+  } catch (error) {
+    const message = error?.response?.data?.message || 'Unable to save request action right now.';
+    window.alert(message);
+  } finally {
+    const nextMap = { ...actionLoadingMap.value };
+    delete nextMap[targetProfileId];
+    actionLoadingMap.value = nextMap;
+  }
+};
+
+const rejectIncomingRequest = async (profileId) => {
+  const reason = window.prompt('Please provide a rejection reason:');
+  if (reason === null) {
+    return;
+  }
+
+  await submitMatchAction(profileId, 'skip', String(reason || '').trim() || 'No reason provided.');
+};
+
+recalculateStats();
+syncRecommendedStatuses();
 
 const recentActivities = [
   { text: 'Anjali viewed your profile', time: '2 min ago', dot: 'bg-rose-500' },

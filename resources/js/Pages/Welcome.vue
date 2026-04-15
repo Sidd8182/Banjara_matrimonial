@@ -80,16 +80,35 @@
           <div class="profile-slider-track">
             <article
               v-for="profile in slidingProfiles"
-              :key="profile.id"
+              :key="profile.slideKey"
               class="profile-slide-card rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
             >
-              <div class="h-36 rounded-xl" :class="profile.bgClass"></div>
-              <h4 class="mt-3 text-lg font-bold text-gray-900">{{ profile.name }}, {{ profile.age }}</h4>
-              <p class="text-sm text-gray-600 mt-1">{{ profile.profession }}, {{ profile.city }}</p>
-              <p class="text-sm text-gray-700 mt-2">{{ profile.about }}</p>
-              <button class="mt-3 w-full rounded-lg px-3 py-2 text-sm font-semibold transition" :class="profile.buttonClass">
+              <img
+                v-if="profile.profilePictureUrl"
+                :src="profile.profilePictureUrl"
+                :alt="profile.name"
+                class="w-full rounded-xl bg-gray-100 object-cover object-top"
+                style="aspect-ratio: 4 / 5;"
+              />
+              <div
+                v-else
+                class="w-full rounded-xl"
+                :class="profile.bgClass"
+                style="aspect-ratio: 4 / 5;"
+              ></div>
+              <h4 class="mt-3 text-lg font-bold text-gray-900">
+                <a :href="profile.profileUrl" class="hover:underline text-blue-700">
+                  {{ profile.name }}<span v-if="profile.age">, {{ profile.age }}</span>
+                </a>
+              </h4>
+              <p class="text-sm text-gray-600 mt-1">{{ profile.city }}, {{ profile.profession }}</p>
+              <a
+                :href="profile.profileUrl"
+                class="mt-3 block w-full rounded-lg px-3 py-2 text-center text-sm font-semibold transition"
+                :class="profile.buttonClass"
+              >
                 View Profile
-              </button>
+              </a>
             </article>
           </div>
         </div>
@@ -293,6 +312,17 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import MainLayout from '@/Layouts/MainLayout.vue';
 
+const props = defineProps({
+  featuredProfiles: {
+    type: Array,
+    default: () => [],
+  },
+  faqs: {
+    type: Array,
+    default: () => [],
+  },
+});
+
 const profiles = [
   {
     id: 1,
@@ -346,7 +376,25 @@ const profiles = [
   },
 ];
 
-const slidingProfiles = [...profiles, ...profiles];
+const effectiveProfiles = computed(() => {
+  if (props.featuredProfiles?.length) {
+    return props.featuredProfiles;
+  }
+
+  return profiles;
+});
+
+const slidingProfiles = computed(() => {
+  const list = effectiveProfiles.value;
+  const duplicated = [...list, ...list];
+
+  return duplicated.map((profile, index) => ({
+    ...profile,
+    slideKey: `${profile.id}-${index}`,
+    profileUrl: profile.profileUrl || `/profiles/${profile.id}/view`,
+    profilePictureUrl: profile.profilePictureUrl || null,
+  }));
+});
 
 const stories = [
   {
@@ -407,7 +455,7 @@ const selectStory = (index) => {
   restartAutoStories();
 };
 
-const faqs = [
+const fallbackFaqs = [
   {
     question: 'How to register on Banjara Matrimony?',
     answer: 'Click Register, fill profile details, verify your mobile number, and complete your partner preferences to start receiving matches.',
@@ -437,6 +485,14 @@ const faqs = [
     answer: 'Assisted Service provides a relationship manager who helps shortlist matches, coordinate responses, and save your time.',
   },
 ];
+
+const faqs = computed(() => {
+  if (props.faqs?.length) {
+    return props.faqs;
+  }
+
+  return fallbackFaqs;
+});
 
 const activeFaqIndex = ref(null);
 

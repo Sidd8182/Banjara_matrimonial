@@ -3,7 +3,7 @@
     <section class="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm mt-8">
       <h1 class="text-2xl font-bold text-gray-900">Verify Your Email</h1>
       <p class="mt-3 text-sm text-gray-600">
-        Aapka account login ho gaya hai lekin email verification pending hai. Verification link email par bheja gaya tha.
+        You are logged in, but your email verification is still pending. A verification link was sent to your email address.
       </p>
 
       <div v-if="statusMessage" class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">

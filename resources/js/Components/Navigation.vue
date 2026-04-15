@@ -25,6 +25,8 @@
           </div>
 
           <a href="/pricing" class="text-gray-700 hover:text-primary transition">Pricing</a>
+          <a href="/pages/about-us" class="text-gray-700 hover:text-primary transition">About</a>
+          <a href="/faqs" class="text-gray-700 hover:text-primary transition">FAQs</a>
           <div class="relative" @mouseenter="openMatchesMenu">
             <button
               class="text-gray-700 hover:text-primary transition inline-flex items-center gap-1"
@@ -62,6 +64,7 @@
             </transition>
           </div>
           <a href="/messages" class="text-gray-700 hover:text-primary transition">Messages</a>
+          <a v-if="isAuthenticated" href="/kundli-history" class="text-gray-700 hover:text-primary transition">Kundli History</a>
         </div>
 
         <!-- Auth Buttons -->
@@ -142,6 +145,8 @@
           </div>
 
           <a href="/pricing" class="text-gray-700 hover:text-primary transition">Pricing</a>
+          <a href="/pages/about-us" class="text-gray-700 hover:text-primary transition">About</a>
+          <a href="/faqs" class="text-gray-700 hover:text-primary transition">FAQs</a>
           <button
             class="text-gray-700 hover:text-primary transition inline-flex items-center justify-between"
             type="button"
@@ -170,6 +175,7 @@
             </div>
           </div>
           <a href="/messages" class="text-gray-700 hover:text-primary transition">Messages</a>
+          <a v-if="isAuthenticated" href="/kundli-history" class="text-gray-700 hover:text-primary transition">Kundli History</a>
         </div>
         <div v-if="isAuthenticated" class="mt-4 grid grid-cols-2 gap-3">
           <a href="/dashboard" class="px-4 py-2 text-center text-primary border border-primary rounded-lg hover:bg-red-50 transition">
